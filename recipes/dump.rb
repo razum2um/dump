@@ -32,7 +32,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
       cmd = %W[#{rake} -s dump:#{command}]
       cmd += env.sort.map{ |key, value| "#{key}=#{value}" }
-      cmd.shelljoin
+      cmd.join(' ')
     end
 
     def fetch_rails_env
@@ -41,7 +41,14 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
     def got_rsync?
       `which rsync`
-      $?.success?
+      return false unless $?.success?
+
+      begin
+        run_remote('which rsync')
+        true
+      rescue Exception => e
+        false
+      end
     end
 
     def do_transfer_via(via, direction, from, to)
@@ -79,7 +86,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
             end
           end
         end
-      when :sftp, :scp
+      when :scp, :sftp
         ContiniousTimeout.timeout 15 do |thread|
           transfer(direction, from, to, :via => via) do |channel, path, transfered, total|
             thread.defer
@@ -114,10 +121,10 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         else
           $stderr.puts "To transfer using rsync — make rsync binary accessible and verify that remote host can work with rsync through ssh"
           begin
-            do_transfer_via(:sftp, direction, from, to)
+            do_transfer_via(:scp, direction, from, to)
           rescue => e
             $stderr.puts e
-            do_transfer_via(:scp, direction, from, to)
+            do_transfer_via(:sftp, direction, from, to)
           end
         end
       end

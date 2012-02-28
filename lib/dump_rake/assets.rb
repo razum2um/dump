@@ -6,7 +6,7 @@ class DumpRake
 
     class << self
       def assets
-        File.readlines(File.join(DumpRake::RailsRoot, 'config/assets')).map(&:strip).grep(/^[^#]/).join(':')
+        File.readlines(File.join(DumpRake::RailsRoot, 'config/assets')).map(&:strip).grep(/^[^#]/).grep(/^[^#]/)..join(':')
       end
 
       def glob_asset_children(asset, glob)
