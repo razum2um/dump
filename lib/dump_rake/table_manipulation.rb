@@ -62,7 +62,9 @@ class DumpRake
           schema_tables.include?(table) || DumpRake::Env.filter(:tables).pass?(table)
         end
       else
-        avaliable_tables - %w[sessions]
+        if File.exists? File.join(DumpRake::RailsRoot, 'config/skip_dump_tables')
+          avaliable_tables - File.readlines(File.join(DumpRake::RailsRoot, 'config/skip_dump_tables')).map(&:strip).grep(/^[^#]/)
+        end - %w[sessions]
       end
     end
 

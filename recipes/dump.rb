@@ -336,8 +336,11 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
   end
 
-  after 'deploy:update_code' do
-    from, to = %W[#{shared_path}/dump #{release_path}/dump]
-    run "mkdir -p #{from}; rm -rf #{to}; ln -s #{from} #{to}"
+  on :load do
+    shared_children << 'dump'
   end
+  #after 'deploy:update_code' do
+  #  from, to = %W[#{shared_path}/dump #{release_path}/dump]
+  #  run "mkdir -p #{from}; rm -rf #{to}; ln -s #{from} #{to}"
+  #end
 end
